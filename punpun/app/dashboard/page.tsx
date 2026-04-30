@@ -84,9 +84,6 @@ export default function DashboardPage() {
       <nav className="bg-white dark:bg-slate-800 border-b border-blue-100 dark:border-slate-700 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">
-              P
-            </div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">PunPun</h1>
           </div>
           <button
