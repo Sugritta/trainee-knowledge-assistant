@@ -42,14 +42,14 @@ export default function LoginPage() {
       // Mock successful login
       console.log('Login successful:', { email, password });
       router.push('/dashboard');
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.');
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-zinc-900 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-linear-to-br from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-zinc-900 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         {/* Card Container */}
         <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-8 space-y-6">
@@ -131,7 +131,7 @@ export default function LoginPage() {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400">
-                Don't have an account?
+                Do not have an account?
               </span>
             </div>
           </div>
