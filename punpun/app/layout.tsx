@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "PunPun",
   description: "PunPun is a simple chat application built with Next.js and Tailwind CSS.",
+  icons: {
+    icon: "/logo.svg",
+  }
 };
 
 export default function RootLayout({
