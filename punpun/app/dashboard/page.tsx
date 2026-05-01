@@ -2,6 +2,19 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+
+interface Source {
+  ref: string;
+  filename: string;
+  description: string;
+}
+
+interface TokenUsage {
+  promptTokens: number;
+  candidateTokens: number;
+  totalTokens: number;
+}
 
 interface Message {
   id: string;
@@ -9,6 +22,8 @@ interface Message {
   text: string;
   timestamp: Date;
   attachments?: string[];
+  sources?: Source[];
+  tokenUsage?: TokenUsage;
 }
 
 export default function DashboardPage() {
@@ -21,12 +36,13 @@ export default function DashboardPage() {
       timestamp: new Date(),
     },
   ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [chatHistory, setChatHistory] = useState<{ role: string; parts: { text: string }[] }[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -42,10 +58,9 @@ export default function DashboardPage() {
     setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!inputValue.trim() && attachedFiles.length === 0) return;
 
-    // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
@@ -55,22 +70,57 @@ export default function DashboardPage() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const currentInput = inputValue;
+    const currentFiles = [...attachedFiles];
     setInputValue('');
     setAttachedFiles([]);
+    setIsLoading(true);
 
-    // Simulate bot response
-    setTimeout(() => {
+    const formData = new FormData();
+    formData.append('userMessage', currentInput);
+    formData.append('history', JSON.stringify(chatHistory));
+    currentFiles.forEach((file) => {
+      formData.append('files', file);
+    });
+
+    try {
+      const response = await fetch('/api/aimodel', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+      const replyText = data.response || 'ขออภัยค่ะ ไม่สามารถตอบได้ในขณะนี้';
+
+      setChatHistory((prev) => [
+        ...prev,
+        { role: 'user', parts: [{ text: currentInput }] },
+        { role: 'model', parts: [{ text: replyText }] },
+      ]);
+
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
-        text: 'ขอบคุณที่ส่งข้อมูลมานะคะ ฉันกำลังประมวลผลคำถามของคุณ...',
+        text: replyText,
+        timestamp: new Date(),
+        sources: data.sources ?? [],
+        tokenUsage: data.tokenUsage ?? null,
+      };
+
+      setMessages((prev) => [...prev, botMessage]);
+
+    } catch (error) {
+      console.error('Error fetching AI response:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'bot',
+        text: 'เกิดข้อผิดพลาดในการเชื่อมต่อค่ะ กรุณาลองใหม่อีกครั้ง',
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, botMessage]);
-    }, 500);
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -80,6 +130,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 flex flex-col">
+
       {/* Navigation */}
       <nav className="bg-white dark:bg-slate-800 border-b border-blue-100 dark:border-slate-700 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
@@ -111,7 +162,12 @@ export default function DashboardPage() {
                     : 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white rounded-bl-none border border-blue-100 dark:border-slate-600'
                 }`}
               >
-                <p className="text-sm lg:text-base wrap-break-words">{message.text}</p>
+                {/* Message Text */}
+                <div className="prose dark:prose-invert max-w-none">
+                  <ReactMarkdown>{message.text}</ReactMarkdown>
+                </div>
+
+                {/* Attached Files (user side) */}
                 {message.attachments && message.attachments.length > 0 && (
                   <div className="mt-2 space-y-1">
                     {message.attachments.map((file, idx) => (
@@ -121,6 +177,52 @@ export default function DashboardPage() {
                     ))}
                   </div>
                 )}
+
+                {/* Document Sources (bot side) */}
+                {message.type === 'bot' && message.sources && message.sources.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-blue-100 dark:border-slate-600">
+                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">
+                      📄 ที่มาของคำตอบ
+                    </p>
+                    <div className="space-y-1">
+                      {message.sources.map((src, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-start gap-2 bg-blue-50 dark:bg-slate-600 rounded-lg px-2 py-1.5"
+                        >
+                          <span className="text-xs font-bold text-blue-500 dark:text-blue-300 shrink-0">
+                            {src.ref}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-xs font-medium text-slate-700 dark:text-slate-200 truncate">
+                              {src.filename}
+                            </p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              {src.description}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Token Usage (bot side) */}
+                {message.type === 'bot' && message.tokenUsage && (
+                  <div className="mt-2 pt-2 border-t border-blue-100 dark:border-slate-600 flex flex-wrap gap-x-3 gap-y-0.5">
+                    <span className="text-xs text-slate-400 dark:text-slate-500">
+                      🔢 Input: <span className="font-medium text-slate-500 dark:text-slate-400">{message.tokenUsage.promptTokens.toLocaleString()}</span>
+                    </span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">
+                      Output: <span className="font-medium text-slate-500 dark:text-slate-400">{message.tokenUsage.candidateTokens.toLocaleString()}</span>
+                    </span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500">
+                      Total: <span className="font-medium text-blue-500 dark:text-blue-400">{message.tokenUsage.totalTokens.toLocaleString()}</span>
+                    </span>
+                  </div>
+                )}
+
+                {/* Timestamp */}
                 <p
                   className={`text-xs mt-1 ${
                     message.type === 'user' ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'
@@ -134,6 +236,18 @@ export default function DashboardPage() {
               </div>
             </div>
           ))}
+
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="bg-white dark:bg-slate-700 px-4 py-3 rounded-2xl rounded-bl-none border border-blue-100 dark:border-slate-600 shadow-sm">
+                <div className="flex space-x-1 items-center">
+                  <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:0ms]" />
+                  <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:150ms]" />
+                  <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:300ms]" />
+                </div>
+              </div>
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -190,7 +304,7 @@ export default function DashboardPage() {
                   handleSendMessage();
                 }
               }}
-              placeholder="พิมพ์ข้อความของคุณ... (Enter = ส่ง, Shift+Enter = ขึ้นบรรทัด)"
+              placeholder="พิมพ์ข้อความของคุณ... "
               className="flex-1 px-4 py-3 border border-blue-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             />
 
