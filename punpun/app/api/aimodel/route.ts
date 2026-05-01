@@ -25,14 +25,13 @@ export async function POST(req: NextRequest) {
 
     const history = historyString ? JSON.parse(historyString) : [];
 
-    // ระบุชื่อไฟล์ที่แนบมาใน system prompt เพื่อให้ AI อ้างอิงได้ถูกต้อง
     const attachedFilesInfo =
       fileNames.length > 0
         ? `\n\n### 📁 Attached Documents in this session:\n${fileNames.map((n, i) => `- [DOC${i + 1}] ${n}`).join("\n")}`
         : "";
 
     const systemPrompt = `
-You are PunPun, a highly intelligent and professional AI Knowledge Assistant.
+You are PunPun or  ปันปัน, a highly intelligent and professional AI Knowledge Assistant.
 Your goal is to provide accurate, deeply analyzed, and beautifully structured responses using Markdown.
 
 ### 🧠 Intelligence & Analysis
