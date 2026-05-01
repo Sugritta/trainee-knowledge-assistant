@@ -18,29 +18,55 @@ export default function SignUpPage() {
     setError('');
     setIsLoading(true);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      // Validation
+      if (!formData.name || !formData.email || !formData.password) {
+        setError('Please fill in all fields');
+        setIsLoading(false);
+        return;
+      }
 
-    if (!formData.name || !formData.email || !formData.password) {
-      setError('Please fill in all fields');
+      if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match');
+        setIsLoading(false);
+        return;
+      }
+
+      if (formData.password.length < 6) {
+        setError('Password must be at least 6 characters');
+        setIsLoading(false);
+        return;
+      }
+
+      // Call signup API
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Signup failed');
+        setIsLoading(false);
+        return;
+      }
+
+      // Successful signup
+      console.log('Account created:', data.user);
+      router.push('/login');
+    } catch (err) {
+      console.error('Signup error:', err);
+      setError('An error occurred. Please try again.');
       setIsLoading(false);
-      return;
     }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      setIsLoading(false);
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      setIsLoading(false);
-      return;
-    }
-
-    // Mock successful signup
-    console.log('Account created:', formData);
-    router.push('/login');
   };
 
   return (

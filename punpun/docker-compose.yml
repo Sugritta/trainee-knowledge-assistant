@@ -1,0 +1,10 @@
+services:
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: Sugritta
+      POSTGRES_PASSWORD: Kaimook2012**
+      POSTGRES_DB: punpun-db
+    ports:
+      - "65484:5432"

@@ -10,40 +10,51 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    // Mock authentication logic
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Validation
+      // 1. การตรวจสอบเบื้องต้น (Validation)
       if (!email || !password) {
         setError('Please fill in all fields');
         setIsLoading(false);
         return;
       }
-
       if (!email.includes('@')) {
         setError('Please enter a valid email address');
         setIsLoading(false);
         return;
       }
 
-      if (password.length < 6) {
-        setError('Password must be at least 6 characters');
+      // 2. ยิง API ไปที่ Backend เพื่อตรวจสอบข้อมูลใน Database
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      // 3. ถ้า API ตอบกลับมาว่า Error (เช่น รหัสผิด หรือไม่มีอีเมลนี้)
+      if (!res.ok) {
+        setError(data.message || 'Invalid email or password');
         setIsLoading(false);
         return;
       }
 
-      // Mock successful login
-      console.log('Login successful:', { email, password });
+      // 4. ล็อกอินสำเร็จ: "เก็บข้อมูลผู้ใช้" (เช่น เก็บลง localStorage หรือ Cookies)
+      console.log('Login successful:', data.user);
+      localStorage.setItem('user', JSON.stringify(data.user)); // <--- เก็บข้อมูลไว้ใช้ในหน้าอื่น
+
+      // 5. เปลี่ยนหน้าไปที่ Dashboard
       router.push('/dashboard');
+      
     } catch {
-      setError('An error occurred. Please try again.');
+      setError('An error occurred while connecting to the server.');
       setIsLoading(false);
     }
   };
