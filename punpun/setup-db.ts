@@ -10,7 +10,7 @@ const prismaCli = path.join(
 );
 
 function run(cmd: string) {
-  execSync(cmd, { cwd, stdio: 'inherit', shell: true });
+  execSync(cmd, { cwd, stdio: 'inherit', shell: '/bin/sh' });
 }
 
 try {
