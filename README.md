@@ -1,36 +1,193 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🤖 PunPun AI Chatbot
 
-## Getting Started
+A knowledge-based AI assistant built with **Next.js**, powered by vector search (Pinecone) and PostgreSQL. Designed to help trainees access and query curated knowledge bases intelligently.
 
-First, run the development server:
+---
+
+## 🛠️ Tech Stack
+
+| Layer       | Technology              |
+|-------------|-------------------------|
+| Framework   | Next.js (App Router)    |
+| Language    | TypeScript              |
+| Backend     | Next.js API Routes      |
+| Database    | PostgreSQL + Prisma ORM |
+| Vector DB   | Pinecone                |
+| AI Model    | Gemini 2.5 Flash        |
+| Styling     | Tailwind CSS            |
+| Container   | Docker / Docker Compose |
+
+---
+
+## ✨ Features
+
+- 💬 AI-powered queries using LLM (via `/api/aimodel`)
+- 🗂️ Vector search with Pinecone for knowledge retrieval
+- 🗃️ PostgreSQL database via Prisma ORM
+- 🐳 Docker support for easy deployment
+- 📋 Dashboard for managing queries and knowledge
+
+---
+
+## ✨ Features Done
+
+- [x] Login + Protected Routes
+- [x] Upload File (PDF, TXT)
+- [x] Chat with AI (basic)
+- [x] Chat with Uploaded File Context
+- [x] Token Usage Counter
+
+## 📁 Project Structure
+
+```text
+
+TRAINEE-KNOWLEDGE-ASSISTANT/
+└── punpun/
+    ├── app/
+    │   ├── signup/             # Signup page
+    │   ├── globals.css         # Global styles
+    │   ├── layout.tsx          # Root layout
+    │   └── page.tsx            # Home page
+    ├── lib/                    # Utility functions / shared logic
+    ├── node_modules/           # Dependencies (do not commit)
+    ├── prisma/                 # Prisma schema & migrations
+    ├── public/                 # Static assets
+    ├── .env                    # Environment variables (do not commit)
+    ├── .env.local              # Local environment overrides
+    ├── .gitignore
+    ├── docker-compose.yml      # Docker Compose config
+    ├── dockerfile              # Dockerfile
+    ├── eslint.config.mjs       # ESLint configuration
+    ├── next-env.d.ts           # Next.js TypeScript declarations
+    ├── next.config.ts          # Next.js configuration
+    ├── package-lock.json
+    ├── package.json
+    ├── postcss.config.mjs      # PostCSS configuration
+    ├── prisma.config.ts        # Prisma configuration
+    ├── setup-db.ts             # Database setup script
+    ├── test-prisma.ts          # Prisma connection test
+    ├── tsconfig.json           # TypeScript configuration
+    ├── AI_JOURNAL.md           # AI development journal
+    ├── CLAUDE.md               # Claude-specific notes
+    ├── DECISION.md             # Architecture decision records
+    └── README.md
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL
+- Pinecone account
+- Docker (optional)
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Sugritta/trainee-knowledge-assistant.git
+cd trainee-knowledge-assistant
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Set up environment variables
+
+Copy `.env.local` and fill in your values:
+
+```bash
+cp .env.local .env
+```
+
+```env
+# Database
+DATABASE_URL=postgresql://user:password@localhost:65484/punpun-db"
+
+# Pinecone
+PINECONE_API_KEY=your_pinecone_api_key
+PINECONE_INDEX=your_index_name
+
+# Auth
+NEXTAUTH_SECRET=your_secret
+NEXTAUTH_URL=http://localhost:3000
+
+# AI Model
+GOOGLE_API_KEY=your_gemini_api_key  
+```
+
+### 4. Set up the database
+
+```bash
+npx prisma generate
+npx prisma migrate dev
+```
+
+Or use the setup script:
+
+```bash
+npx ts-node setup-db.ts
+```
+
+### 5. Run the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🐳 Running with Docker
 
-## Learn More
+```bash
+docker-compose up --build
+```
 
-To learn more about Next.js, take a look at the following resources:
+This will start both the Next.js app and the PostgreSQL database.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📡 API Endpoints
 
-## Deploy on Vercel
+| Method | Endpoint             | Description                  |
+|--------|----------------------|------------------------------|
+| POST   | `/api/auth/...`      | Authentication (NextAuth)    |
+| POST   | `/api/aimodel`       | Send query to AI             |
+| POST   | `/api/pinecone`      | Query vector knowledge base  |
+| GET    | `/api/user`          | Get user information         |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🧪 Scripts
+
+```bash
+npm run dev        # Start development server
+npm run build      # Build for production
+npm run start      # Start production server
+npm run lint       # Run ESLint
+npx ts-node setup-db.ts      # Initialize database
+npx ts-node test-prisma.ts   # Test Prisma connection
+```
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Commit your changes: `git commit -m 'Add some feature'`
+4. Push to the branch: `git push origin feature/your-feature`
+5. Open a Pull Request
+
+---
+
+## 👤 Author
+
+PunPun AI Assistant - Sugritta Singharatho
