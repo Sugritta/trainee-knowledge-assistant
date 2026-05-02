@@ -1,10 +1,29 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:latest
+    container_name: punpun-db-container
     restart: always
     environment:
       POSTGRES_USER: Sugritta
       POSTGRES_PASSWORD: Kaimook2012**
       POSTGRES_DB: punpun-db
     ports:
-      - "65484:5432"
+      - "65484:5432" # เครื่องนอกเข้าผ่าน 65484 แต่ข้างใน container คุยกันผ่าน 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    container_name: trainee-knowledge-assistant-container
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://Sugritta:Kaimook2012**@db:5432/punpun-db
+    depends_on:
+      - db
+
+volumes:
+  postgres_data: # ช่วยให้ข้อมูลใน DB ไม่หายเวลาเราสั่ง down/up ใหม่

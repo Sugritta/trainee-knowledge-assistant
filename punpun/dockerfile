@@ -1,0 +1,22 @@
+# เปลี่ยนจาก 18 เป็น 20-alpine หรือ 22-alpine
+FROM node:20-alpine
+
+WORKDIR /app
+
+# ก๊อปปี้ไฟล์สำหรับจัดการ Dependencies
+COPY package*.json ./
+COPY prisma ./prisma/ 
+
+# ติดตั้ง Dependencies (ตอนนี้ Node v20 จะไม่บ่นเรื่อง EBADENGINE แล้ว)
+RUN npm install
+
+# สร้าง Prisma Client
+RUN npx prisma generate
+
+COPY . .
+
+RUN npm run build
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
