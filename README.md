@@ -1,4 +1,4 @@
-# 🤖 PunPun AI Chatbot
+# 🤖 PunPun AI Chatbot (Trainee Knowledge Assistant)
 
 A knowledge-based AI assistant built with **Next.js**, powered by vector search (Pinecone) and PostgreSQL. Designed to help trainees access and query curated knowledge bases intelligently.
 
@@ -41,16 +41,37 @@ A knowledge-based AI assistant built with **Next.js**, powered by vector search 
 
 ```text
 
-TRAINEE-KNOWLEDGE-ASSISTANT/
-└── punpun/
-    ├── app/
-    │   ├── signup/             # Signup page
-    │   ├── globals.css         # Global styles
-    │   ├── layout.tsx          # Root layout
-    │   └── page.tsx            # Home page
-    ├── lib/                    # Utility functions / shared logic
-    ├── node_modules/           # Dependencies (do not commit)
-    ├── prisma/                 # Prisma schema & migrations
+    TRAINEE-KNOWLEDGE-ASSISTANT/
+    ├── punpun/
+    │   ├── .next/
+    │   └── app/
+    │       ├── api/
+    │       │   ├── aimodel/
+    |       |   |    └── route.ts
+    │       │   ├── auth/
+    │       │   │   ├── login/
+    │       │   │   │   └── route.ts
+    │       │   │   └── signup/
+    │       │   │       └── route.ts
+    │       │   ├── pinecone/
+    |       |   |    └── route.ts
+    │       │   └── user/
+    |       |   |    └── route.ts
+    │       ├── dashboard/
+    │       │   └── page.tsx
+    │       ├── forgot-password/
+    │       │   └── page.tsx
+    │       ├── generated\prisma/
+    │       ├── login/
+    │       │   └── page.tsx
+    │       ├── signup/
+    │       │   └── page.tsx
+    │       ├── globals.css
+    │       ├── layout.tsx
+    │       └── page.tsx
+    ├── lib/
+    ├── node_modules/
+    ├── prisma/
     ├── public/                 # Static assets
     ├── .env                    # Environment variables (do not commit)
     ├── .env.local              # Local environment overrides
